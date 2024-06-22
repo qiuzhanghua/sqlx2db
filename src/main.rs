@@ -2,6 +2,7 @@ use sqlx::any::AnyPoolOptions;
 
 #[tokio::main]
 async fn main() -> Result<(), sqlx::Error> {
+    sqlx::any::install_default_drivers();
     dotenv::dotenv().ok();
     let db_url = std::env::var("DATABASE_URL");
     if let Ok(url) = db_url {
@@ -9,7 +10,7 @@ async fn main() -> Result<(), sqlx::Error> {
             .max_connections(5)
             .connect(&url)
             .await?;
-        println!("{:?}", pool.any_kind());
+        println!("{:?}", pool.connect_options().database_url.scheme());
         // let conn = pool.acquire().await?;
         let row: (String,) = sqlx::query_as(r#"SELECT version() v"#)
             .fetch_one(&pool)
